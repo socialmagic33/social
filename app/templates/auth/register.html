@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Register - LeadMagic{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Create your account</h1>
+        
+        <form method="POST" class="form">
+            <div class="form-group">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" id="email" name="email" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+                <div id="password-strength" class="mt-2 text-sm"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Create account
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p>Already have an account? <a href="/login" class="auth-link">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

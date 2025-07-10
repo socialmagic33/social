@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Posts - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="card mb-6">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="card-title">Posts</h1>
+                    <p class="card-description">Manage your social media posts</p>
+                </div>
+                <button onclick="scheduleAllPosts()" class="btn btn-primary">Schedule All Posts</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheduled Posts -->
+    <div class="card mb-6">
+        <div class="card-header">
+            <h2 class="card-title">Scheduled Posts ({{ scheduled_posts|length }})</h2>
+        </div>
+        
+        {% if scheduled_posts %}
+        <div class="grid gap-4">
+            {% for post in scheduled_posts %}
+            <div class="flex justify-between items-center p-4 border rounded">
+                <div class="flex items-center gap-4">
+                    {% if post.media_grouping and post.media_grouping.media %}
+                    <div class="grid grid-cols-2 gap-1" style="width: 80px; height: 80px;">
+                        {% for media in post.media_grouping.media[:4] %}
+                        <div style="aspect-ratio: 1; border-radius: 0.25rem; overflow: hidden;">
+                            {% if media.file_url.endswith(('.mp4', '.mov', '.webm')) %}
+                            <video src="{{ media.file_url }}" class="w-full h-full object-cover"></video>
+                            {% else %}
+                            <img src="{{ media.file_url }}" alt="" class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div>
+                        <p class="font-medium">{{ post.platform.title() if post.platform else "Instagram" }}</p>
+                        <p class="text-sm text-secondary">{{ post.scheduled_for.strftime('%Y-%m-%d %H:%M') }}</p>
+                        {% if post.jobsite %}
+                        <p class="text-sm text-secondary">{{ post.jobsite.address }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-success">Scheduled</span>
+                    <a href="/posts/preview/{{ post.grouping_id }}" class="btn btn-outline">Edit</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center" style="padding: 2rem;">
+            <p class="text-secondary">No posts scheduled yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Unscheduled Posts -->
+    <div class="card mb-6">
+        <div class="card-header">
+            <h2 class="card-title">Unscheduled Posts ({{ unscheduled_posts|length }})</h2>
+        </div>
+        
+        {% if unscheduled_posts %}
+        <div class="grid gap-4">
+            {% for post in unscheduled_posts %}
+            <div class="flex justify-between items-center p-4 border rounded">
+                <div class="flex items-center gap-4">
+                    {% if post.media_grouping and post.media_grouping.media %}
+                    <div class="grid grid-cols-2 gap-1" style="width: 80px; height: 80px;">
+                        {% for media in post.media_grouping.media[:4] %}
+                        <div style="aspect-ratio: 1; border-radius: 0.25rem; overflow: hidden;">
+                            {% if media.file_url.endswith(('.mp4', '.mov', '.webm')) %}
+                            <video src="{{ media.file_url }}" class="w-full h-full object-cover"></video>
+                            {% else %}
+                            <img src="{{ media.file_url }}" alt="" class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div>
+                        <p class="font-medium">{{ post.platform.title() if post.platform else "Instagram" }}</p>
+                        <p class="text-sm text-secondary">Created {{ post.created_at.strftime('%Y-%m-%d') }}</p>
+                        {% if post.jobsite %}
+                        <p class="text-sm text-secondary">{{ post.jobsite.address }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-warning">Not Scheduled</span>
+                    <a href="/posts/preview/{{ post.grouping_id }}" class="btn btn-primary">Schedule</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center" style="padding: 2rem;">
+            <p class="text-secondary">No unscheduled posts. Process jobsite media to create posts.</p>
+            <a href="/jobsites" class="btn btn-primary mt-4">View Jobsites</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Published Posts -->
+    {% if published_posts %}
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Recently Published ({{ published_posts|length }})</h2>
+        </div>
+        
+        <div class="grid gap-4">
+            {% for post in published_posts %}
+            <div class="flex justify-between items-center p-4 border rounded">
+                <div class="flex items-center gap-4">
+                    {% if post.media_grouping and post.media_grouping.media %}
+                    <div class="grid grid-cols-2 gap-1" style="width: 80px; height: 80px;">
+                        {% for media in post.media_grouping.media[:4] %}
+                        <div style="aspect-ratio: 1; border-radius: 0.25rem; overflow: hidden;">
+                            {% if media.file_url.endswith(('.mp4', '.mov', '.webm')) %}
+                            <video src="{{ media.file_url }}" class="w-full h-full object-cover"></video>
+                            {% else %}
+                            <img src="{{ media.file_url }}" alt="" class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div>
+                        <p class="font-medium">{{ post.platform.title() if post.platform else "Instagram" }}</p>
+                        <p class="text-sm text-secondary">Published {{ post.created_at.strftime('%Y-%m-%d') }}</p>
+                        {% if post.jobsite %}
+                        <p class="text-sm text-secondary">{{ post.jobsite.address }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <span class="badge badge-success">Published</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function scheduleAllPosts() {
+    if (confirm('Schedule all unscheduled posts? This will automatically assign posting times based on your plan.')) {
+        LeadMagic.schedulePosts();
+    }
+}
+</script>
+{% endblock %}

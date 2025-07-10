@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="card mb-6">
+        <div class="card-header">
+            <h1 class="card-title">Account Settings</h1>
+            <p class="card-description">Manage your account preferences and settings</p>
+        </div>
+    </div>
+
+    {% if success %}
+    <div class="alert alert-success mb-6">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-error mb-6">{{ error }}</div>
+    {% endif %}
+
+    <!-- Profile Information -->
+    <div class="card mb-6">
+        <div class="card-header">
+            <h2 class="card-title">Profile Information</h2>
+        </div>
+        
+        <form method="POST" action="/settings/profile" class="form">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" value="{{ current_user.email }}" class="form-input" disabled>
+                    <p class="text-sm text-secondary mt-1">Email cannot be changed</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="company_name" class="form-label">Company Name</label>
+                    <input type="text" id="company_name" name="company_name" 
+                           value="{{ current_user.company_name or '' }}" class="form-input" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="values" class="form-label">Company Values</label>
+                <textarea id="values" name="values" class="form-textarea" rows="3" required>{{ current_user.values or '' }}</textarea>
+                <p class="text-sm text-secondary mt-1">What values drive your business? (e.g., quality, reliability, customer satisfaction)</p>
+            </div>
+
+            <div class="form-group">
+                <label for="specialties" class="form-label">Specialties</label>
+                <textarea id="specialties" name="specialties" class="form-textarea" rows="3" required>{{ current_user.specialties or '' }}</textarea>
+                <p class="text-sm text-secondary mt-1">What services do you specialize in? (e.g., kitchen remodeling, roofing, landscaping)</p>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card mb-6">
+        <div class="card-header">
+            <h2 class="card-title">Change Password</h2>
+        </div>
+        
+        <form method="POST" action="/settings/password" class="form">
+            <div class="form-group">
+                <label for="current_password" class="form-label">Current Password</label>
+                <input type="password" id="current_password" name="current_password" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password" class="form-label">New Password</label>
+                <input type="password" id="new_password" name="new_password" class="form-input" required>
+                <div id="password-strength" class="mt-2 text-sm"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Account Plan -->
+    <div class="card mb-6">
+        <div class="card-header">
+            <h2 class="card-title">Account Plan</h2>
+        </div>
+        
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="font-medium">Current plan: {{ current_user.plan.replace('_', ' ').title() }}</p>
+                <p class="text-sm text-secondary">Manage your subscription and billing</p>
+            </div>
+            <a href="/pricing" class="btn btn-outline">View Plans & Pricing</a>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title" style="color: var(--error-color);">Danger Zone</h2>
+        </div>
+        
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="font-medium">Delete Account</p>
+                <p class="text-sm text-secondary">Permanently delete your account and all data</p>
+            </div>
+            <button onclick="confirmDeleteAccount()" class="btn btn-danger">Delete Account</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDeleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.')) {
+        if (confirm('This is your final warning. Are you absolutely sure you want to delete your account?')) {
+            LeadMagic.apiRequest('/settings/delete-account', {
+                method: 'POST'
+            }).then(() => {
+                window.location.href = '/login';
+            }).catch(error => {
+                LeadMagic.showAlert('Failed to delete account: ' + error.message, 'error');
+            });
+        }
+    }
+}
+
+// Password strength checker
+document.getElementById('new_password')?.addEventListener('input', function() {
+    const strengthContainer = document.getElementById('password-strength');
+    if (strengthContainer) {
+        const checks = LeadMagic.checkPasswordStrength?.(this.value) || {};
+        const requirements = [
+            { key: 'length', text: 'At least 8 characters' },
+            { key: 'uppercase', text: 'One uppercase letter' },
+            { key: 'lowercase', text: 'One lowercase letter' },
+            { key: 'number', text: 'One number' },
+            { key: 'special', text: 'One special character' }
+        ];
+        
+        strengthContainer.innerHTML = requirements.map(req => 
+            `<div style="color: ${checks[req.key] ? 'var(--success-color)' : 'var(--text-secondary)'}">• ${req.text}</div>`
+        ).join('');
+    }
+});
+</script>
+{% endblock %}

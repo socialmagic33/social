@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LeadMagic{% endblock %}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='/favicon.ico') }}">
+</head>
+<body>
+    {% if current_user %}
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-container">
+                <a href="/" class="logo">LeadMagic</a>
+                <ul class="nav-links">
+                    <li><a href="/dashboard" class="{{ 'active' if request.url.path == '/dashboard' }}">Dashboard</a></li>
+                    <li><a href="/media" class="{{ 'active' if request.url.path.startswith('/media') }}">Media</a></li>
+                    <li><a href="/jobsites" class="{{ 'active' if request.url.path.startswith('/jobsites') }}">Jobsites</a></li>
+                    <li><a href="/posts" class="{{ 'active' if request.url.path.startswith('/posts') }}">Posts</a></li>
+                    <li><a href="/social" class="{{ 'active' if request.url.path.startswith('/social') }}">Social</a></li>
+                    <li><a href="/settings" class="{{ 'active' if request.url.path.startswith('/settings') }}">Settings</a></li>
+                    <li><a href="/logout" class="btn btn-outline">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content">
+        <div class="container">
+            {% if messages %}
+            <div id="alert-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.type }} fade-in">
+                    {{ message.text }}
+                    <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 1.2rem; cursor: pointer;">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="card mb-6">
+        <div class="card-header">
+            <h1 class="card-title">Welcome back, {{ current_user.company_name or current_user.email }}</h1>
+            <p class="card-description">Manage your social media content and schedule posts from one place.</p>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_media }}</div>
+            <div class="stat-label">Media Files</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_jobsites }}</div>
+            <div class="stat-label">Jobsites</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.scheduled_posts }}</div>
+            <div class="stat-label">Scheduled Posts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.published_posts }}</div>
+            <div class="stat-label">Published Posts</div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="grid grid-cols-3 gap-6">
+        <!-- Recent Media -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Recent Media</h2>
+                <a href="/media" class="btn btn-outline">View All</a>
+            </div>
+            
+            {% if recent_media %}
+            <div class="grid gap-4">
+                {% for media in recent_media %}
+                <div class="flex items-center gap-3">
+                    <div class="media-item" style="width: 60px; height: 60px;">
+                        {% if media.file_url.endswith(('.mp4', '.mov', '.webm')) %}
+                        <video src="{{ media.file_url }}" class="w-full h-full object-cover rounded"></video>
+                        {% else %}
+                        <img src="{{ media.file_url }}" alt="" class="w-full h-full object-cover rounded">
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium">{{ media.description or "No description" }}</p>
+                        <p class="text-sm text-secondary">{{ media.created_at.strftime('%Y-%m-%d') }}</p>
+                        <span class="badge badge-{{ 'success' if media.status == 'after' else 'warning' if media.status == 'in_progress' else 'info' }}">
+                            {{ media.status.replace('_', ' ').title() }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-secondary">No media uploaded yet. <a href="/upload" class="auth-link">Upload your first media</a></p>
+            {% endif %}
+        </div>
+
+        <!-- Upcoming Posts -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Upcoming Posts</h2>
+                <a href="/posts" class="btn btn-outline">View All</a>
+            </div>
+            
+            {% if upcoming_posts %}
+            <div class="grid gap-4">
+                {% for post in upcoming_posts %}
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="font-medium">{{ post.platform.title() if post.platform else "Instagram" }}</p>
+                        <p class="text-sm text-secondary">{{ post.scheduled_for.strftime('%Y-%m-%d %H:%M') if post.scheduled_for else "Not scheduled" }}</p>
+                    </div>
+                    <span class="badge badge-{{ 'success' if post.status == 'scheduled' else 'warning' }}">
+                        {{ post.status.replace('_', ' ').title() }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-secondary">No posts scheduled yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Jobsites -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Jobsites</h2>
+                <a href="/jobsites" class="btn btn-outline">View All</a>
+            </div>
+            
+            {% if jobsites %}
+            <div class="grid gap-4">
+                {% for jobsite in jobsites %}
+                <div class="flex items-center justify-between">
+                    <div>
+                        <a href="/jobsites/{{ jobsite.id }}" class="font-medium auth-link">{{ jobsite.address }}</a>
+                        <p class="text-sm text-secondary">{{ jobsite.media|length }} media items</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-secondary">No jobsites added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mt-6">
+        <div class="card-header">
+            <h2 class="card-title">Quick Actions</h2>
+        </div>
+        <div class="flex gap-4">
+            <a href="/upload" class="btn btn-primary">Upload Media</a>
+            <button onclick="LeadMagic.schedulePosts()" class="btn btn-secondary">Schedule Posts</button>
+            <a href="/social" class="btn btn-outline">Connect Social Media</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

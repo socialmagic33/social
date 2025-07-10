@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}New Jobsite - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="flex items-center gap-4 mb-6">
+        <a href="/jobsites" class="btn btn-outline">← Back to Jobsites</a>
+        <h1 class="text-2xl font-bold">Add New Jobsite</h1>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+        <div class="card-header">
+            <h2 class="card-title">Jobsite Information</h2>
+            <p class="card-description">Create a new jobsite to organize your media and posts</p>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-error mb-4">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" class="form">
+            <div class="form-group">
+                <label for="address" class="form-label">Jobsite Address *</label>
+                <input type="text" id="address" name="address" class="form-input" required
+                       placeholder="123 Main St, City, State, ZIP"
+                       autocomplete="street-address">
+                <p class="text-sm text-secondary mt-1">Enter the full address of the jobsite</p>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <a href="/jobsites" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Jobsite</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

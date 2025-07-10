@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Jobsites - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="card mb-6">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="card-title">Jobsites</h1>
+                    <p class="card-description">Manage your project locations</p>
+                </div>
+                <a href="/jobsites/new" class="btn btn-primary">Add Jobsite</a>
+            </div>
+        </div>
+    </div>
+
+    {% if jobsites %}
+    <div class="grid grid-cols-3 gap-6">
+        {% for jobsite in jobsites %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ jobsite.address }}</h3>
+                <p class="card-description">Created {{ jobsite.created_at.strftime('%Y-%m-%d') }}</p>
+            </div>
+
+            {% if jobsite.media %}
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                {% for media in jobsite.media[:3] %}
+                <div class="media-item" style="aspect-ratio: 1; border-radius: 0.375rem; overflow: hidden;">
+                    {% if media.file_url.endswith(('.mp4', '.mov', '.webm')) %}
+                    <video src="{{ media.file_url }}" class="w-full h-full object-cover"></video>
+                    {% else %}
+                    <img src="{{ media.file_url }}" alt="" class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% if jobsite.media|length > 3 %}
+                <div class="flex items-center justify-center bg-gray-100 rounded text-sm text-secondary">
+                    +{{ jobsite.media|length - 3 }} more
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-secondary">
+                    <p>{{ jobsite.media|length }} media items</p>
+                    <p>{{ jobsite.posts|length if jobsite.posts else 0 }} posts</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/jobsites/{{ jobsite.id }}" class="btn btn-outline">View</a>
+                    {% if jobsite.media %}
+                    <button onclick="processJobsiteMedia({{ jobsite.id }})" class="btn btn-secondary">Process</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card text-center">
+        <div style="padding: 3rem;">
+            <h3 class="text-xl font-semibold mb-4">No jobsites yet</h3>
+            <p class="text-secondary mb-6">Create your first jobsite to start organizing your media</p>
+            <a href="/jobsites/new" class="btn btn-primary">Add Your First Jobsite</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function processJobsiteMedia(jobsiteId) {
+    if (confirm('Process media for this jobsite? This will group media and prepare posts.')) {
+        LeadMagic.processJobsiteMedia(jobsiteId);
+    }
+}
+</script>
+{% endblock %}

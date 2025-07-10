@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Connect Social Media - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="card mb-6">
+        <div class="card-header">
+            <h1 class="card-title">Connect Social Media Accounts</h1>
+            <p class="card-description">Connect your social media accounts to start scheduling and publishing posts</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-6">
+        <!-- Meta Business Suite -->
+        <div class="card">
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h2 class="card-title">Meta Business Suite</h2>
+                    {% if meta_connected %}
+                    <span class="badge badge-success">Connected</span>
+                    {% endif %}
+                </div>
+                <p class="card-description">Connect your Facebook Page and Instagram Business account</p>
+            </div>
+
+            {% if meta_connected %}
+            <div class="grid gap-3">
+                {% for account in meta_accounts %}
+                <div class="flex justify-between items-center p-3 border rounded">
+                    <div>
+                        <p class="font-medium">{{ account.name }}</p>
+                        <p class="text-sm text-secondary">{{ account.platform.title() }}</p>
+                    </div>
+                    <button onclick="disconnectAccount('{{ account.platform }}', '{{ account.id }}')" 
+                            class="btn btn-outline btn-danger">Disconnect</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center" style="padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📘</div>
+                <p class="text-secondary mb-4">Connect your Facebook and Instagram accounts to start posting</p>
+                <a href="/api/social/meta/auth" class="btn btn-primary">Connect Meta Account</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Nextdoor -->
+        <div class="card">
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h2 class="card-title">Nextdoor</h2>
+                    {% if nextdoor_connected %}
+                    <span class="badge badge-success">Connected</span>
+                    {% endif %}
+                </div>
+                <p class="card-description">Connect your Nextdoor Business account</p>
+            </div>
+
+            {% if nextdoor_connected %}
+            <div class="flex justify-between items-center p-3 border rounded">
+                <div>
+                    <p class="font-medium">{{ nextdoor_account.name }}</p>
+                    <p class="text-sm text-secondary">Business Account</p>
+                </div>
+                <button onclick="disconnectAccount('nextdoor', '{{ nextdoor_account.id }}')" 
+                        class="btn btn-outline btn-danger">Disconnect</button>
+            </div>
+            {% else %}
+            <div class="text-center" style="padding: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🏘️</div>
+                <p class="text-secondary mb-4">Connect your Nextdoor Business account to reach local customers</p>
+                <a href="/api/social/nextdoor/auth" class="btn btn-primary">Connect Nextdoor Account</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="card mt-6">
+        <div class="card-header">
+            <h2 class="card-title">Connection Status</h2>
+        </div>
+        
+        <div class="grid gap-4">
+            <div class="flex justify-between items-center">
+                <span>Instagram Business</span>
+                <span class="badge badge-{{ 'success' if meta_connected else 'warning' }}">
+                    {{ 'Connected' if meta_connected else 'Not Connected' }}
+                </span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span>Facebook Page</span>
+                <span class="badge badge-{{ 'success' if meta_connected else 'warning' }}">
+                    {{ 'Connected' if meta_connected else 'Not Connected' }}
+                </span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span>Nextdoor Business</span>
+                <span class="badge badge-{{ 'success' if nextdoor_connected else 'warning' }}">
+                    {{ 'Connected' if nextdoor_connected else 'Not Connected' }}
+                </span>
+            </div>
+        </div>
+
+        {% if not meta_connected and not nextdoor_connected %}
+        <div class="alert alert-warning mt-4">
+            <p>Connect at least one social media account to start scheduling posts.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+async function disconnectAccount(platform, accountId) {
+    if (!confirm(`Are you sure you want to disconnect this ${platform} account?`)) {
+        return;
+    }
+
+    try {
+        const response = await LeadMagic.apiRequest(`/api/social/${platform}/disconnect`, {
+            method: 'POST',
+            body: JSON.stringify({ account_id: accountId })
+        });
+
+        LeadMagic.showAlert('Account disconnected successfully', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+        
+    } catch (error) {
+        LeadMagic.showAlert('Failed to disconnect account: ' + error.message, 'error');
+    }
+}
+</script>
+{% endblock %}

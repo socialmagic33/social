@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Preview Post - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="flex items-center gap-4 mb-6">
+        <a href="/posts" class="btn btn-outline">← Back to Posts</a>
+        <h1 class="text-2xl font-bold">Preview & Schedule Post</h1>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error mb-6">{{ error }}</div>
+    {% endif %}
+
+    <div class="grid grid-cols-2 gap-6">
+        <!-- Media Preview -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Media</h2>
+                <p class="card-description">{{ grouping.jobsite.address }}</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2">
+                {% for media in grouping.media %}
+                <div style="aspect-ratio: 1; border-radius: 0.375rem; overflow: hidden;">
+                    {% if media.file_url.endswith(('.mp4', '.mov', '.webm')) %}
+                    <video src="{{ media.file_url }}" class="w-full h-full object-cover" controls></video>
+                    {% else %}
+                    <img src="{{ media.file_url }}" alt="" class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Post Editor -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Post Content</h2>
+            </div>
+            
+            <form method="POST" class="form">
+                <div class="form-group">
+                    <label for="caption" class="form-label">Caption</label>
+                    <textarea id="caption" name="caption" class="form-textarea" rows="8" required>{{ grouping.generated_caption or "" }}</textarea>
+                    <p class="text-sm text-secondary mt-1">Write your post caption here</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="scheduled_for" class="form-label">Schedule For</label>
+                    <input type="datetime-local" id="scheduled_for" name="scheduled_for" class="form-input" 
+                           value="{{ default_schedule.strftime('%Y-%m-%dT%H:%M') }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Platforms</label>
+                    <div class="grid gap-2">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="platforms" value="instagram" checked disabled>
+                            <span>Instagram (Primary)</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="platforms" value="facebook" checked>
+                            <span>Facebook (Cross-post)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <a href="/posts" class="btn btn-outline">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Schedule Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Platform Previews -->
+    <div class="card mt-6">
+        <div class="card-header">
+            <h2 class="card-title">Platform Previews</h2>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-6">
+            <div class="border rounded p-4">
+                <h3 class="font-medium mb-2">Instagram Preview</h3>
+                <div class="bg-gray-50 rounded p-4">
+                    <div id="instagram-preview" class="text-sm whitespace-pre-wrap">{{ grouping.generated_caption or "Enter caption above to see preview" }}</div>
+                </div>
+            </div>
+            
+            <div class="border rounded p-4">
+                <h3 class="font-medium mb-2">Facebook Preview</h3>
+                <div class="bg-gray-50 rounded p-4">
+                    <div id="facebook-preview" class="text-sm whitespace-pre-wrap">{{ grouping.generated_caption or "Enter caption above to see preview" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updatePreviews() {
+    const caption = document.getElementById('caption').value;
+    document.getElementById('instagram-preview').textContent = caption || 'Enter caption above to see preview';
+    document.getElementById('facebook-preview').textContent = caption || 'Enter caption above to see preview';
+}
+
+document.getElementById('caption').addEventListener('input', updatePreviews);
+</script>
+{% endblock %}

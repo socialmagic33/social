@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Media - LeadMagic{% endblock %}
+
+{% block content %}
+<div data-fade-in>
+    <div class="card mb-6">
+        <div class="card-header">
+            <h1 class="card-title">Upload Media</h1>
+            <p class="card-description">Upload photos and videos from your jobsites</p>
+        </div>
+    </div>
+
+    {% if success %}
+    <div class="alert alert-success mb-6">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+    <div class="alert alert-error mb-6">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="grid gap-6" data-autosave="upload-form">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Media Files</h2>
+            </div>
+            
+            <div class="file-upload" id="file-drop-zone">
+                <div class="text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+                    <p class="text-lg font-medium mb-2">Drop files here or click to browse</p>
+                    <p class="text-secondary">Supports images (JPG, PNG) and videos (MP4, MOV)</p>
+                    <input type="file" name="files" multiple accept="image/*,video/*" required 
+                           class="hidden" id="file-input">
+                    <button type="button" onclick="document.getElementById('file-input').click()" 
+                            class="btn btn-primary mt-4">Choose Files</button>
+                </div>
+            </div>
+            
+            <div id="file-preview" class="grid grid-cols-4 gap-4 mt-4 hidden"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Jobsite Information</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="jobsite_address" class="form-label">Jobsite Address *</label>
+                    <input type="text" id="jobsite_address" name="jobsite_address" class="form-input" required
+                           placeholder="123 Main St, City, State">
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea id="description" name="description" class="form-textarea" rows="3"
+                              placeholder="Brief description of the work or progress"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes" class="form-label">Notes</label>
+                    <textarea id="notes" name="notes" class="form-textarea" rows="2"
+                              placeholder="Additional notes or details"></textarea>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Media Details</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status" class="form-label">Status *</label>
+                    <select id="status" name="status" class="form-select" required>
+                        <option value="">Select status</option>
+                        <option value="before">Before</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="after">After</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="star_rating" class="form-label">Star Rating *</label>
+                    <select id="star_rating" name="star_rating" class="form-select" required>
+                        <option value="">Select rating</option>
+                        <option value="1">1 Star</option>
+                        <option value="2">2 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="5">5 Stars</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="earliest_upload" class="form-label">Earliest Upload</label>
+                    <select id="earliest_upload" name="earliest_upload" class="form-select">
+                        <option value="ASAP">ASAP</option>
+                        <option value="1_week">1 Week</option>
+                        <option value="2_weeks">2 Weeks</option>
+                        <option value="1_month">1 Month</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex justify-between items-center">
+                <a href="/media" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">Upload Media</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('file-drop-zone');
+    const preview = document.getElementById('file-preview');
+
+    // Setup drag and drop
+    LeadMagic.setupDragAndDrop?.(dropZone, fileInput);
+
+    // File preview
+    fileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        preview.innerHTML = '';
+        
+        if (files.length > 0) {
+            preview.classList.remove('hidden');
+            
+            files.forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'relative';
+                
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.className = 'w-full h-24 object-cover rounded';
+                    div.appendChild(img);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.className = 'w-full h-24 object-cover rounded';
+                    video.controls = true;
+                    div.appendChild(video);
+                }
+                
+                const name = document.createElement('p');
+                name.textContent = file.name;
+                name.className = 'text-sm text-center mt-1 truncate';
+                div.appendChild(name);
+                
+                preview.appendChild(div);
+            });
+        } else {
+            preview.classList.add('hidden');
+        }
+    });
+});
+</script>
+{% endblock %}
